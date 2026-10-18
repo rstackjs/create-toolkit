@@ -846,13 +846,17 @@ export async function create({
       typeof template !== 'string' && template.name === templateName,
   );
   if (typeof customTemplate === 'object') {
-    const unsupportedOptions = Object.entries({
-      '--tools': argv.tools,
-      '--skill': argv.skill,
-      '--template-version': argv.templateVersion ?? argv['template-version'],
-    })
-      .filter(([, value]) => value !== undefined)
-      .map(([option]) => option);
+    const unsupportedOptions: string[] = [];
+    if (argv.tools !== undefined) {
+      unsupportedOptions.push('--tools');
+    }
+    if (argv.skill !== undefined) {
+      unsupportedOptions.push('--skill');
+    }
+    const templateVersion = argv.templateVersion ?? argv['template-version'];
+    if (templateVersion !== undefined) {
+      unsupportedOptions.push('--template-version');
+    }
 
     if (unsupportedOptions.length) {
       throw new Error(
