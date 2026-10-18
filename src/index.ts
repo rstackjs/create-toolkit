@@ -168,8 +168,8 @@ export type Template =
   | {
       name: string;
       /**
-       * Create the project after its path and overwrite permission are resolved.
-       * Owns all remaining setup, including tools, skills, Git, and next steps.
+       * Create a project using an external CLI or custom generation logic.
+       * Replaces the toolkit's built-in project setup.
        */
       create: (context: TemplateCreateContext) => void | Promise<void>;
     };
