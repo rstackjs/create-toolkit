@@ -23,35 +23,6 @@ npm add @rstackjs/create-toolkit -D
 
 ## Features
 
-### Custom templates
-
-Use a template object with a `name` and `create` function to run an external scaffolder or generate files programmatically. String templates keep the existing file-copying behavior:
-
-```ts
-create({
-  templates: [
-    'react-ts',
-    {
-      name: 'custom',
-      create: async ({
-        distFolder,
-        packageName,
-        packageManager,
-        gitEnabled,
-        override,
-      }) => {
-        // Call an external CLI or generate project files here.
-      },
-    },
-  ],
-  // ...other options
-});
-```
-
-`getTemplateName` still returns the selected template's name. The toolkit resolves the project path and confirms overwriting before calling `create`. `distFolder` is an absolute path, and `override` includes any overwrite confirmation from the user.
-
-The toolkit awaits `create` and then stops. The callback owns the remaining setup, including tools, skills, Git initialization, and next-step messages. Errors propagate to the caller. Registered custom templates take precedence over local directories and npm template resolution, and their names appear in `--help`.
-
 ### Configure Built-in Tools
 
 The toolkit provides ESLint, Rslint, Biome, and Prettier as built-in tools. Use
@@ -143,6 +114,29 @@ create({
 The callback runs for both enabled and disabled Git initialization. `isGitRoot`
 indicates whether the generated project directory is the root of its Git
 worktree.
+
+### Custom template creation
+
+Register a template with a `name` and `create` function to use an external CLI or generate project files yourself:
+
+```ts
+create({
+  templates: [
+    'react-ts',
+    {
+      name: 'custom',
+      create: async (context) => {
+        // Invoke your scaffolder using the resolved project options.
+      },
+    },
+  ],
+  // ...other options
+});
+```
+
+`getTemplateName` returns the template name as usual. The callback receives the absolute `distFolder`, `packageName`, `packageManager`, `gitEnabled`, and `override`. The `override` value includes any overwrite confirmation from the user.
+
+The callback replaces the built-in project setup, including file generation, tools, skills, Git initialization, and next-step messages. It may return a promise; errors propagate to the caller. String templates keep their existing behavior.
 
 ### NPM Template Support
 

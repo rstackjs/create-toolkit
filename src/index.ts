@@ -797,11 +797,6 @@ export async function create({
 
   const cwd = process.cwd();
 
-  // No version provided, read from package.json
-  if (!version) {
-    version = (await readPackageJson(root)).version;
-  }
-
   const projectName =
     argv.dir ??
     checkCancel<string>(
@@ -860,6 +855,11 @@ export async function create({
       override,
     });
     return;
+  }
+
+  // No version provided, read from package.json
+  if (!version) {
+    version = (await readPackageJson(root)).version;
   }
 
   const templateParameters = { packageManager };
