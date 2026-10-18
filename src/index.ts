@@ -470,6 +470,26 @@ const parseArgv = (processArgv: string[]) => {
   return argv;
 };
 
+function validateCustomTemplateOptions(argv: Argv, templateName: string) {
+  const unsupportedOptions: string[] = [];
+  if (argv.tools !== undefined) {
+    unsupportedOptions.push('--tools');
+  }
+  if (argv.skill !== undefined) {
+    unsupportedOptions.push('--skill');
+  }
+  const templateVersion = argv.templateVersion ?? argv['template-version'];
+  if (templateVersion !== undefined) {
+    unsupportedOptions.push('--template-version');
+  }
+
+  if (unsupportedOptions.length) {
+    throw new Error(
+      `Template "${templateName}" does not support ${unsupportedOptions.join(', ')}. Remove the unsupported options and use the template's setup flow instead.`,
+    );
+  }
+}
+
 type ExtraTool = {
   /**
    * The value of the multiselect option.
@@ -846,23 +866,7 @@ export async function create({
       typeof template !== 'string' && template.name === templateName,
   );
   if (typeof customTemplate === 'object') {
-    const unsupportedOptions: string[] = [];
-    if (argv.tools !== undefined) {
-      unsupportedOptions.push('--tools');
-    }
-    if (argv.skill !== undefined) {
-      unsupportedOptions.push('--skill');
-    }
-    const templateVersion = argv.templateVersion ?? argv['template-version'];
-    if (templateVersion !== undefined) {
-      unsupportedOptions.push('--template-version');
-    }
-
-    if (unsupportedOptions.length) {
-      throw new Error(
-        `Template "${templateName}" does not support ${unsupportedOptions.join(', ')}. Remove the unsupported options and use the template's setup flow instead.`,
-      );
-    }
+    validateCustomTemplateOptions(argv, templateName);
 
     await customTemplate.create({
       distFolder,
