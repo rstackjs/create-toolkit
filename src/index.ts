@@ -153,6 +153,27 @@ export type GitResolvedContext = GitContext & {
   distFolder: string;
 };
 
+export type TemplateCreateContext = {
+  /** Absolute path to the project directory. */
+  distFolder: string;
+  packageName: string;
+  packageManager: string;
+  gitEnabled: boolean;
+  /** Whether overwriting was requested or confirmed by the user. */
+  override: boolean;
+};
+
+export type Template =
+  | string
+  | {
+      name: string;
+      /**
+       * Create a project using an external CLI or custom generation logic.
+       * Replaces the toolkit's built-in project setup.
+       */
+      create: (context: TemplateCreateContext) => void | Promise<void>;
+    };
+
 export type BuiltinToolName = 'eslint' | 'rslint' | 'biome' | 'prettier';
 
 export const BUILTIN_TOOLS: BuiltinToolName[] = [
@@ -188,7 +209,7 @@ function resolveBuiltinTools(
 
 function logHelpMessage(
   name: string,
-  templates: string[],
+  templates: Template[],
   git: boolean,
   builtinTools: BuiltinToolName[] | undefined,
   extraTools?: ExtraTool[],
@@ -250,7 +271,7 @@ function logHelpMessage(
     'Options:',
     optionLines,
     '',
-    `Available templates: ${templates.join(', ')}`,
+    `Available templates: ${templates.map((template) => (typeof template === 'string' ? template : template.name)).join(', ')}`,
   ];
 
   if (hasTools) {
@@ -694,7 +715,7 @@ export async function create({
   name: string;
   root: string;
   skipFiles?: string[];
-  templates: string[];
+  templates: Template[];
   getTemplateName: (argv: Argv) => Promise<string>;
   /**
    * Specify the package manager for the selected template.
@@ -776,11 +797,6 @@ export async function create({
 
   const cwd = process.cwd();
 
-  // No version provided, read from package.json
-  if (!version) {
-    version = (await readPackageJson(root)).version;
-  }
-
   const projectName =
     argv.dir ??
     checkCancel<string>(
@@ -803,7 +819,8 @@ export async function create({
     ? targetDir
     : path.join(cwd, targetDir);
 
-  if (!argv.override && fs.existsSync(distFolder) && !isEmptyDir(distFolder)) {
+  let override = argv.override ?? false;
+  if (!override && fs.existsSync(distFolder) && !isEmptyDir(distFolder)) {
     const option = checkCancel<string>(
       await select({
         message: `"${targetDir}" is not empty, please choose:`,
@@ -817,11 +834,34 @@ export async function create({
     if (option === 'no') {
       cancelAndExit();
     }
+    override = true;
   }
 
   const templateName = await getTemplateName(argv);
   const packageManager =
     getPackageManager?.({ templateName }) ?? detectedPackageManager;
+
+  const customTemplate = templates.find(
+    (template) =>
+      typeof template !== 'string' && template.name === templateName,
+  );
+  if (typeof customTemplate === 'object') {
+    await customTemplate.create({
+      distFolder,
+      packageName:
+        packageName === '.' ? path.basename(distFolder) : packageName,
+      packageManager,
+      gitEnabled,
+      override,
+    });
+    return;
+  }
+
+  // No version provided, read from package.json
+  if (!version) {
+    version = (await readPackageJson(root)).version;
+  }
+
   const templateParameters = { packageManager };
 
   const srcFolder = path.join(root, `template-${templateName}`);

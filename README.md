@@ -115,6 +115,29 @@ The callback runs for both enabled and disabled Git initialization. `isGitRoot`
 indicates whether the generated project directory is the root of its Git
 worktree.
 
+### Custom template creation
+
+Register a template with a `name` and `create` function to use an external CLI or generate project files yourself:
+
+```ts
+create({
+  templates: [
+    'react-ts',
+    {
+      name: 'custom',
+      create: async (context) => {
+        // Invoke your scaffolder using the resolved project options.
+      },
+    },
+  ],
+  // ...other options
+});
+```
+
+`getTemplateName` returns the template name as usual. The callback receives the absolute `distFolder`, `packageName`, `packageManager`, `gitEnabled`, and `override`. The `override` value includes any overwrite confirmation from the user.
+
+The callback replaces the built-in project setup, including file generation, tools, skills, Git initialization, and next-step messages. It may return a promise; errors propagate to the caller. String templates keep their existing behavior.
+
 ### NPM Template Support
 
 `@rstackjs/create-toolkit` supports using npm packages as templates, allowing users to create projects from custom templates published to npm.
