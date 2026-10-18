@@ -138,6 +138,8 @@ create({
 
 The callback replaces the built-in project setup, including file generation, tools, skills, Git initialization, and next-step messages. It may return a promise; errors propagate to the caller. String templates keep their existing behavior.
 
+Custom templates reject `--tools`, `--skill`, and `--template-version`. Configure these through your custom setup instead. Project paths, `--package-name`, `--no-git`, and `--override` are passed to the callback through its context.
+
 ### NPM Template Support
 
 `@rstackjs/create-toolkit` supports using npm packages as templates, allowing users to create projects from custom templates published to npm.

@@ -846,6 +846,20 @@ export async function create({
       typeof template !== 'string' && template.name === templateName,
   );
   if (typeof customTemplate === 'object') {
+    const unsupportedOptions = Object.entries({
+      '--tools': argv.tools,
+      '--skill': argv.skill,
+      '--template-version': argv.templateVersion ?? argv['template-version'],
+    })
+      .filter(([, value]) => value !== undefined)
+      .map(([option]) => option);
+
+    if (unsupportedOptions.length) {
+      throw new Error(
+        `Template "${templateName}" does not support ${unsupportedOptions.join(', ')}. Remove the unsupported options and use the template's setup flow instead.`,
+      );
+    }
+
     await customTemplate.create({
       distFolder,
       packageName:
