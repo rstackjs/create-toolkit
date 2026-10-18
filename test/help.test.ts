@@ -6,6 +6,24 @@ afterEach(() => {
   rs.restoreAllMocks();
 });
 
+test('help message includes custom template names without creating a project', async () => {
+  const log = rs.spyOn(logger, 'log').mockImplementation(() => {});
+  const createTemplate = rs.fn();
+
+  await create({
+    name: 'test',
+    root: '.',
+    templates: ['vanilla', { name: 'external', create: createTemplate }],
+    getTemplateName: async () => 'external',
+    argv: ['node', 'test', '--help'],
+  });
+
+  expect(log.mock.calls.flat().join('\n')).toContain(
+    'Available templates: vanilla, external',
+  );
+  expect(createTemplate).not.toHaveBeenCalled();
+});
+
 test('help message uses compact, aligned output', async () => {
   const log = rs.spyOn(logger, 'log').mockImplementation(() => {});
 

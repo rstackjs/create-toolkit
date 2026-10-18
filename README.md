@@ -23,6 +23,35 @@ npm add @rstackjs/create-toolkit -D
 
 ## Features
 
+### Custom templates
+
+Use a template object with a `name` and `create` function to run an external scaffolder or generate files programmatically. String templates keep the existing file-copying behavior:
+
+```ts
+create({
+  templates: [
+    'react-ts',
+    {
+      name: 'custom',
+      create: async ({
+        distFolder,
+        packageName,
+        packageManager,
+        gitEnabled,
+        override,
+      }) => {
+        // Call an external CLI or generate project files here.
+      },
+    },
+  ],
+  // ...other options
+});
+```
+
+`getTemplateName` still returns the selected template's name. The toolkit resolves the project path and confirms overwriting before calling `create`. `distFolder` is an absolute path, and `override` includes any overwrite confirmation from the user.
+
+The toolkit awaits `create` and then stops. The callback owns the remaining setup, including tools, skills, Git initialization, and next-step messages. Errors propagate to the caller. Registered custom templates take precedence over local directories and npm template resolution, and their names appear in `--help`.
+
 ### Configure Built-in Tools
 
 The toolkit provides ESLint, Rslint, Biome, and Prettier as built-in tools. Use
