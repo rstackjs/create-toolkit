@@ -81,3 +81,19 @@ test('should propagate errors from a custom template', async () => {
 
   await expect(create(options)).rejects.toBe(error);
 });
+
+test.each([
+  {
+    args: ['--tools', '', '--skill', 'example-skill', '--template-version', ''],
+    unsupported: '--tools, --skill, --template-version',
+  },
+  { args: ['--templateVersion', '1.0.0'], unsupported: '--template-version' },
+])(
+  'should reject unsupported options: $args',
+  async ({ args, unsupported }) => {
+    await expect(
+      create({ ...options, argv: [...options.argv, ...args] }),
+    ).rejects.toThrow(`Template "external" does not support ${unsupported}.`);
+    expect(createTemplate).not.toHaveBeenCalled();
+  },
+);
