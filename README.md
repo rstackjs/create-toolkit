@@ -23,6 +23,26 @@ npm add @rstackjs/create-toolkit -D
 
 ## Features
 
+### CLI Version Display
+
+Pass the optional `cliVersion` string to display your scaffolding CLI's version
+in the startup greeting:
+
+```ts
+create({
+  name: 'rsbuild',
+  cliVersion: '1.2.3',
+  // ...other options
+});
+```
+
+The greeting becomes `Create Rsbuild Project v1.2.3` in both interactive and
+non-interactive runs. Omitting `cliVersion` or passing an empty string keeps
+the existing greeting. Help output is unchanged.
+
+This option only controls the displayed version. The existing `version` option
+continues to control dependency versions in generated templates.
+
 ### Configure Built-in Tools
 
 The toolkit provides ESLint, Rslint, Biome, and Prettier as built-in tools. Use
