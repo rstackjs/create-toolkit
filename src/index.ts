@@ -29,6 +29,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export { autocomplete, groupMultiselect, multiselect, select, text };
+export { xSync };
 
 // Export npm template utilities
 export {
