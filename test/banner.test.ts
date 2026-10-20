@@ -15,7 +15,7 @@ let projectDir: string;
 beforeEach(() => {
   rs.resetAllMocks();
   rs.spyOn(logger, 'greet').mockImplementation(() => {});
-  root = fs.mkdtempSync(path.join(os.tmpdir(), 'create-toolkit-cli-version-'));
+  root = fs.mkdtempSync(path.join(os.tmpdir(), 'create-toolkit-banner-'));
   projectDir = path.join(root, 'project');
   fs.mkdirSync(path.join(root, 'template-common'));
   fs.mkdirSync(path.join(root, 'template-vanilla'));
@@ -47,18 +47,27 @@ const getOptions = () => ({
 });
 
 test.each([
-  { options: {}, suffix: '' },
-  { options: { cliVersion: '' }, suffix: '' },
-  { options: { cliVersion: '2.3.4' }, suffix: ' v2.3.4' },
-  { options: { cliVersion: '2.3.4-beta.1' }, suffix: ' v2.3.4-beta.1' },
+  { options: {}, expected: 'Create Test Project' },
+  { options: { banner: undefined }, expected: 'Create Test Project' },
+  { options: { banner: '' }, expected: '' },
+  {
+    options: { banner: 'create-rsbuild v2.2.14' },
+    expected: 'create-rsbuild v2.2.14',
+  },
+  {
+    options: { banner: 'toolkit@2.0.0-beta.1' },
+    expected: 'toolkit@2.0.0-beta.1',
+  },
+  {
+    options: { banner: 'My custom scaffolder' },
+    expected: 'My custom scaffolder',
+  },
 ])(
-  'should display the non-interactive greeting with $options',
-  async ({ options, suffix }) => {
+  'should display the non-interactive banner: $expected',
+  async ({ options, expected }) => {
     await create({ ...getOptions(), ...options });
 
-    expect(logger.greet).toHaveBeenCalledExactlyOnceWith(
-      `\n◆  Create Test Project${suffix}`,
-    );
+    expect(logger.greet).toHaveBeenCalledExactlyOnceWith(`\n◆  ${expected}`);
     expect(mocks.text).not.toHaveBeenCalled();
     expect(mocks.multiselect).not.toHaveBeenCalled();
     const pkg = JSON.parse(
@@ -74,10 +83,14 @@ test.each([
 ])(
   'should keep dependency version replacement separate: $version',
   async ({ version, expected }) => {
-    await create({ ...getOptions(), version, cliVersion: '2.3.4' });
+    await create({
+      ...getOptions(),
+      version,
+      banner: 'create-rsbuild v2.2.14',
+    });
 
     expect(logger.greet).toHaveBeenCalledExactlyOnceWith(
-      '\n◆  Create Test Project v2.3.4',
+      '\n◆  create-rsbuild v2.2.14',
     );
     const pkg = JSON.parse(
       fs.readFileSync(path.join(projectDir, 'package.json'), 'utf-8'),
@@ -86,26 +99,32 @@ test.each([
   },
 );
 
-test('should display the CLI version before interactive prompts', async () => {
+test('should display the custom banner before interactive prompts', async () => {
   mocks.text.mockImplementation(async () => {
     expect(logger.greet).toHaveBeenCalledExactlyOnceWith(
-      '\n◆  Create Test Project v2.3.4',
+      '\n◆  create-rsbuild v2.2.14',
     );
     return projectDir;
   });
 
   await create({
     ...getOptions(),
-    cliVersion: '2.3.4',
+    banner: 'create-rsbuild v2.2.14',
     builtinTools: [],
     argv: ['node', 'test'],
   });
 
   expect(mocks.text).toHaveBeenCalledTimes(1);
+  expect(mocks.text).toHaveBeenCalledWith(
+    expect.objectContaining({
+      placeholder: 'test-project',
+      defaultValue: 'test-project',
+    }),
+  );
   expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
 });
 
-test('should leave help output unchanged when a CLI version is provided', async () => {
+test('should leave help output unchanged when a banner is provided', async () => {
   const log = rs.spyOn(logger, 'log').mockImplementation(() => {});
   const getTemplateName = rs.fn();
   const options = {
@@ -117,7 +136,7 @@ test('should leave help output unchanged when a CLI version is provided', async 
   await create(options);
   const helpCalls = [...log.mock.calls];
   log.mockClear();
-  await create({ ...options, cliVersion: '2.3.4' });
+  await create({ ...options, banner: 'create-rsbuild v2.2.14' });
 
   expect(log.mock.calls).toEqual(helpCalls);
   expect(logger.greet).not.toHaveBeenCalled();

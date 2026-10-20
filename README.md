@@ -23,25 +23,27 @@ npm add @rstackjs/create-toolkit -D
 
 ## Features
 
-### CLI Version Display
+### Custom Startup Banner
 
-Pass the optional `cliVersion` string to display your scaffolding CLI's version
-in the startup greeting:
+Pass the optional `banner` string to customize the complete startup greeting:
 
 ```ts
 create({
   name: 'rsbuild',
-  cliVersion: '1.2.3',
+  banner: 'create-rsbuild v2.2.14',
   // ...other options
 });
 ```
 
-The greeting becomes `Create Rsbuild Project v1.2.3` in both interactive and
-non-interactive runs. Omitting `cliVersion` or passing an empty string keeps
-the existing greeting. Help output is unchanged.
+The toolkit displays `create-rsbuild v2.2.14` with the existing greeting style
+in both interactive and non-interactive runs. Compose the full text in the
+caller, including any package name or version you want to display.
 
-This option only controls the displayed version. The existing `version` option
-continues to control dependency versions in generated templates.
+Omitting `banner` keeps the existing `Create <name> Project` greeting. An empty
+string is displayed as provided. Help output is unchanged.
+
+The existing `version` option continues to control dependency versions in
+generated templates independently of the banner.
 
 ### Configure Built-in Tools
 
