@@ -1,6 +1,6 @@
 {
   "name": "@rstackjs/create-toolkit",
-  "version": "2.2.10",
+  "version": "2.2.11",
   "description": "Create a new Rstack project",
   "repository": {
     "type": "git",
