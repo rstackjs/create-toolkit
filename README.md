@@ -25,7 +25,7 @@ npm add @rstackjs/create-toolkit -D
 
 ### Custom Startup Banner
 
-Pass the optional `banner` string to customize the complete startup greeting:
+Pass the optional `banner` string to customize the startup greeting:
 
 ```ts
 create({
@@ -35,15 +35,7 @@ create({
 });
 ```
 
-The toolkit displays `create-rsbuild v2.2.14` with the existing greeting style
-in both interactive and non-interactive runs. Compose the full text in the
-caller, including any package name or version you want to display.
-
-Omitting `banner` keeps the existing `Create <name> Project` greeting. An empty
-string is displayed as provided. Help output is unchanged.
-
-The existing `version` option continues to control dependency versions in
-generated templates independently of the banner.
+Supply the complete text; the toolkit applies the existing greeting style. Omit `banner` to keep `Create <name> Project`. The `version` option for template dependencies is unchanged.
 
 ### Configure Built-in Tools
 
