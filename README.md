@@ -23,6 +23,20 @@ npm add @rstackjs/create-toolkit -D
 
 ## Features
 
+### Custom Startup Banner
+
+Pass the optional `banner` string to customize the startup greeting:
+
+```ts
+create({
+  name: 'rsbuild',
+  banner: 'create-rsbuild v2.2.14',
+  // ...other options
+});
+```
+
+Supply the complete text; the toolkit applies the existing greeting style. Omit `banner` to keep `Create <name> Project`. The `version` option for template dependencies is unchanged.
+
 ### Configure Built-in Tools
 
 The toolkit provides ESLint, Rslint, Biome, and Prettier as built-in tools. Use

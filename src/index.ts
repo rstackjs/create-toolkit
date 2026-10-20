@@ -725,6 +725,7 @@ export async function create({
   mapESLintTemplate,
   mapRslintTemplate,
   version,
+  banner,
   noteInformation,
   git = true,
   onGitResolved,
@@ -761,6 +762,11 @@ export async function create({
     context: { distFolder: string },
   ) => RslintTemplateName | null;
   version?: Record<string, string> | string;
+  /**
+   * The complete text to display in the startup greeting.
+   * Omit this option to use `Create <name> Project`.
+   */
+  banner?: string;
   noteInformation?: string[];
   /**
    * Whether to initialize a Git repository by default when the target directory
@@ -801,7 +807,7 @@ export async function create({
     return;
   }
 
-  logger.greet(`\n◆  Create ${upperFirst(name)} Project`);
+  logger.greet(`\n◆  ${banner ?? `Create ${upperFirst(name)} Project`}`);
 
   const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent);
   const detectedPackageManager = pkgInfo ? pkgInfo.name : 'npm';
